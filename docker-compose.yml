@@ -1,0 +1,7 @@
+services:
+  claimer:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./accounts.json:/app/accounts.json:ro
+      - ./logs:/app/logs
