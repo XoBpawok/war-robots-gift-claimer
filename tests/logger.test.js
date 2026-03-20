@@ -1,6 +1,4 @@
 const { maskEmail } = require('../src/logger');
-const fs = require('fs');
-const path = require('path');
 
 describe('maskEmail', () => {
   test('masks all but first 3 chars before @', () => {
