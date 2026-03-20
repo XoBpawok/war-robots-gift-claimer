@@ -1,0 +1,16 @@
+{
+  "name": "war-robots-gift-claimer",
+  "version": "1.0.0",
+  "description": "Auto-claims gifts on market.my.games",
+  "main": "src/claimer.js",
+  "scripts": {
+    "start": "node src/claimer.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "puppeteer": "22.15.0"
+  },
+  "devDependencies": {
+    "jest": "29.7.0"
+  }
+}
