@@ -23,8 +23,8 @@ RUN npm ci --omit=dev
 # Copy source
 COPY src/ ./src/
 
-# Create logs directory
-RUN mkdir -p /app/logs
+# Create logs directory and log file
+RUN mkdir -p /app/logs && touch /app/logs/cron.log
 
 # Add cron job: run every 6 hours
 # PUPPETEER_EXECUTABLE_PATH is explicitly set in the cron line because

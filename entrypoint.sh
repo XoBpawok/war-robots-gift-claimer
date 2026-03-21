@@ -1,8 +1,10 @@
 #!/bin/sh
-set -e
 
-echo "[entrypoint] Running claimer on startup..." >> /app/logs/cron.log 2>&1
-node /app/src/claimer.js >> /app/logs/cron.log 2>&1
+echo "[entrypoint] Running claimer on startup..."
+node /app/src/claimer.js
 
-echo "[entrypoint] Starting cron..." >> /app/logs/cron.log 2>&1
-exec cron -f
+echo "[entrypoint] Starting cron..."
+cron
+
+# Tail log file to stdout so docker logs captures cron output
+tail -f /app/logs/cron.log
