@@ -35,7 +35,7 @@ RUN printf '%s\n' \
     "0 20 * * * sleep \$((RANDOM \% 7200)) && PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node /app/src/claimer.js >> /app/logs/cron.log 2>&1" \
     | crontab -
 
-# Entrypoint: run claimer once on startup, then start cron
+# Entrypoint: start cron and tail logs to stdout
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
