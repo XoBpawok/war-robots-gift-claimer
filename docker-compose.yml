@@ -1,6 +1,6 @@
 services:
   claimer:
-    build: .
+    image: ghcr.io/xobpawok/war-robots-gift-claimer:latest
     restart: unless-stopped
     volumes:
       - ./accounts.json:/app/accounts.json:ro

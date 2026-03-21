@@ -21,49 +21,44 @@ Create `accounts.json` in the project root (use `accounts.json.example` as a tem
 
 ## Deploy on Portainer
 
-The app ships as a Docker image built from source. Portainer needs access to the source code to build it. There are two ways to provide that.
+Every push to `master` automatically builds and publishes the Docker image to GHCR via GitHub Actions. Portainer pulls that image directly — no source code needed on the host.
 
----
+### 1. Prepare accounts.json on the host
 
-### Option A — Git repository stack (recommended)
-
-Portainer can clone the repo and build the image automatically — no SSH needed.
-
-1. In Portainer, go to **Stacks → Add stack**
-2. Name it `war-robots-claimer`
-3. Choose **Repository** as the build method
-4. Set **Repository URL** to `https://github.com/XoBpawok/war-robots-gift-claimer`
-5. Set **Compose path** to `docker-compose.yml`
-6. Under **Advanced settings → Env variables**, add any overrides if needed (see [Environment variables](#environment-variables))
-7. Click **Deploy the stack**
-
-Portainer will clone the repo into a directory on the host and run `docker compose up --build` from there.
-
-**Before deploying**, SSH into the host and create `accounts.json` inside the directory Portainer uses for the stack (shown in the stack details after deployment). Then redeploy or restart the container.
-
-> Alternatively: SSH in first, create the file at a known absolute path, and update the volume path in `docker-compose.yml` to an absolute path (e.g. `/opt/war-robots/accounts.json`).
-
----
-
-### Option B — Clone manually, deploy with Web editor
-
-If you prefer full control over where the source lives:
-
-1. SSH into the Docker host and clone the repo:
+SSH into the Docker host and create the accounts file:
 
 ```bash
-git clone https://github.com/XoBpawok/war-robots-gift-claimer.git /opt/war-robots
-cd /opt/war-robots
-cp accounts.json.example accounts.json
-# edit accounts.json with real credentials
+mkdir -p /opt/war-robots/logs
+nano /opt/war-robots/accounts.json
 ```
 
-2. In Portainer, go to **Stacks → Add stack**
-3. Choose **Web editor**, paste the contents of `docker-compose.yml`
-4. Set **Working directory** (under Advanced) to `/opt/war-robots`
-5. Click **Deploy the stack**
+Paste your credentials:
 
-Portainer will run `docker compose up --build` from `/opt/war-robots`, where both the `Dockerfile` and `accounts.json` already exist.
+```json
+[
+  { "login": "user1@example.com", "password": "secret1" }
+]
+```
+
+### 2. Create the stack in Portainer
+
+1. Go to **Stacks → Add stack**
+2. Name it `war-robots-claimer`
+3. Choose **Web editor** and paste:
+
+```yaml
+services:
+  claimer:
+    image: ghcr.io/xobpawok/war-robots-gift-claimer:latest
+    restart: unless-stopped
+    volumes:
+      - /opt/war-robots/accounts.json:/app/accounts.json:ro
+      - /opt/war-robots/logs:/app/logs
+```
+
+4. Click **Deploy the stack**
+
+Docker will pull the image from GHCR and start the container. Done.
 
 ---
 
