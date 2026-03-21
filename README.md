@@ -21,47 +21,49 @@ Create `accounts.json` in the project root (use `accounts.json.example` as a tem
 
 ## Deploy on Portainer
 
-### Prerequisites
+The app ships as a Docker image built from source. Portainer needs access to the source code to build it. There are two ways to provide that.
 
-- Portainer running with access to a Docker host
-- The repository cloned or uploaded to the host (or accessible via Git)
+---
 
-### Option A — Docker Compose stack (recommended)
+### Option A — Git repository stack (recommended)
+
+Portainer can clone the repo and build the image automatically — no SSH needed.
 
 1. In Portainer, go to **Stacks → Add stack**
 2. Name it `war-robots-claimer`
-3. Choose **Web editor** and paste the contents of `docker-compose.yml`:
+3. Choose **Repository** as the build method
+4. Set **Repository URL** to `https://github.com/XoBpawok/war-robots-gift-claimer`
+5. Set **Compose path** to `docker-compose.yml`
+6. Under **Advanced settings → Env variables**, add any overrides if needed (see [Environment variables](#environment-variables))
+7. Click **Deploy the stack**
 
-```yaml
-services:
-  claimer:
-    build: .
-    restart: unless-stopped
-    volumes:
-      - ./accounts.json:/app/accounts.json:ro
-      - ./logs:/app/logs
-```
+Portainer will clone the repo into a directory on the host and run `docker compose up --build` from there.
 
-4. Under **Env variables**, add any overrides if needed (see [Environment variables](#environment-variables))
-5. Click **Deploy the stack**
+**Before deploying**, SSH into the host and create `accounts.json` inside the directory Portainer uses for the stack (shown in the stack details after deployment). Then redeploy or restart the container.
 
-> The `accounts.json` file must exist on the host at the path relative to the stack directory before deploying.
+> Alternatively: SSH in first, create the file at a known absolute path, and update the volume path in `docker-compose.yml` to an absolute path (e.g. `/opt/war-robots/accounts.json`).
 
-### Option B — Build and deploy image manually
+---
 
-1. On the Docker host, build the image:
+### Option B — Clone manually, deploy with Web editor
+
+If you prefer full control over where the source lives:
+
+1. SSH into the Docker host and clone the repo:
 
 ```bash
-docker build -t war-robots-claimer .
+git clone https://github.com/XoBpawok/war-robots-gift-claimer.git /opt/war-robots
+cd /opt/war-robots
+cp accounts.json.example accounts.json
+# edit accounts.json with real credentials
 ```
 
-2. In Portainer, go to **Containers → Add container**
-3. Set the image to `war-robots-claimer`
-4. Under **Volumes**, add two bind mounts:
-   - `/path/to/accounts.json` → `/app/accounts.json` (read-only)
-   - `/path/to/logs` → `/app/logs`
-5. Set **Restart policy** to `Unless stopped`
-6. Click **Deploy the container**
+2. In Portainer, go to **Stacks → Add stack**
+3. Choose **Web editor**, paste the contents of `docker-compose.yml`
+4. Set **Working directory** (under Advanced) to `/opt/war-robots`
+5. Click **Deploy the stack**
+
+Portainer will run `docker compose up --build` from `/opt/war-robots`, where both the `Dockerfile` and `accounts.json` already exist.
 
 ---
 
