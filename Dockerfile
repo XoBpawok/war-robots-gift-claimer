@@ -29,7 +29,14 @@ RUN mkdir -p /app/logs
 # Add cron job: run every 6 hours
 # PUPPETEER_EXECUTABLE_PATH is explicitly set in the cron line because
 # cron runs in a minimal shell that does not inherit Docker ENV variables
-RUN echo "0 */6 * * * PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node /app/src/claimer.js >> /app/logs/cron.log 2>&1" | crontab -
+RUN printf '%s\n' \
+    "0 8  * * * sleep \$((RANDOM \% 7200)) && PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node /app/src/claimer.js >> /app/logs/cron.log 2>&1" \
+    "0 14 * * * sleep \$((RANDOM \% 7200)) && PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node /app/src/claimer.js >> /app/logs/cron.log 2>&1" \
+    "0 20 * * * sleep \$((RANDOM \% 7200)) && PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node /app/src/claimer.js >> /app/logs/cron.log 2>&1" \
+    | crontab -
 
-# Start cron in foreground
-CMD ["cron", "-f"]
+# Entrypoint: run claimer once on startup, then start cron
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
