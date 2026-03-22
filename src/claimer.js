@@ -43,17 +43,23 @@ async function claimGifts(page, maskedLogin) {
   // Re-query each iteration to avoid stale handles after DOM updates
   while (true) {
     const handle = await page.evaluateHandle(() =>
-      [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Free')
+      [...document.querySelectorAll('button')].find(b => {
+        if (b.textContent.trim() !== 'Free') return false;
+        const card = b.closest('[class*="itemCard__"]');
+        const title = card && card.querySelector('[class*="itemCard__title"]');
+        return !title || title.textContent.trim() !== '500 Modules';
+      })
     );
     const claimBtn = handle.asElement();
     if (!claimBtn) break;
 
     try {
-      await claimBtn.click();
+      await page.evaluate(el => el.click(), claimBtn);
       log(`[${maskedLogin}] Clicked Free button, waiting for modal...`);
 
       await page.waitForSelector('.ant-modal-body button', { timeout: TIMEOUT });
-      await page.click('.ant-modal-body button');
+      const modalBtn = await page.$('.ant-modal-body button');
+      await page.evaluate(el => el.click(), modalBtn);
       log(`[${maskedLogin}] Dismissed modal for gift ${claimed + 1}`);
 
       // Wait for modal to close before next gift
