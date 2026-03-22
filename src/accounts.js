@@ -18,8 +18,8 @@ function loadAccounts(filePath) {
 
   for (let i = 0; i < accounts.length; i++) {
     const a = accounts[i];
-    if (!a.login || typeof a.login !== 'string') {
-      throw new Error(`Account at index ${i} is missing a valid "login" field`);
+    if (!a.email || typeof a.email !== 'string') {
+      throw new Error(`Account at index ${i} is missing a valid "email" field`);
     }
     if (!a.password || typeof a.password !== 'string') {
       throw new Error(`Account at index ${i} is missing a valid "password" field`);

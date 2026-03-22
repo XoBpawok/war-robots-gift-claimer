@@ -9,7 +9,7 @@ describe('loadAccounts', () => {
   test('returns array of accounts from valid file', () => {
     const accounts = loadAccounts(validPath);
     expect(accounts).toHaveLength(2);
-    expect(accounts[0]).toEqual({ login: 'user1@example.com', password: 'pass1' });
+    expect(accounts[0]).toEqual({ email: 'user1@example.com', password: 'pass1' });
   });
 
   test('throws if file does not exist', () => {
@@ -20,11 +20,11 @@ describe('loadAccounts', () => {
     expect(() => loadAccounts(emptyPath)).toThrow(/empty/i);
   });
 
-  test('throws if an account is missing login', () => {
+  test('throws if an account is missing email', () => {
     const { writeFileSync } = require('fs');
     const tmpPath = path.join(__dirname, 'fixtures/bad-accounts.json');
     writeFileSync(tmpPath, JSON.stringify([{ password: 'pass' }]));
-    expect(() => loadAccounts(tmpPath)).toThrow(/login/i);
+    expect(() => loadAccounts(tmpPath)).toThrow(/email/i);
     require('fs').unlinkSync(tmpPath);
   });
 });

@@ -1,4 +1,4 @@
 [
-  { "login": "user1@example.com", "password": "pass1" },
-  { "login": "user2@example.com", "password": "pass2" }
+  { "email": "user1@example.com", "password": "pass1" },
+  { "email": "user2@example.com", "password": "pass2" }
 ]
