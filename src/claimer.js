@@ -7,9 +7,6 @@ const GIFTS_URL = 'https://market.my.games/games/163?content=gifts';
 const ACCOUNTS_PATH = path.join(__dirname, '..', 'accounts.json');
 const TIMEOUT = 30000;
 
-// Only claim daily (100 Thorium) and weekly (500 Thorium) gifts
-const CLAIMABLE_TITLES = ['100 Thorium', '500 Thorium'];
-
 // Launches a browser with stealth settings to avoid bot detection
 async function createPage() {
   const browser = await puppeteer.launch({
@@ -43,18 +40,16 @@ async function click(page, el) {
   await page.evaluate(el => el.click(), el);
 }
 
-// Finds the next unclaimed Thorium gift button on the page.
+// Finds the next unclaimed gift button on the page. The site rotates which
+// rewards are offered day to day, so any "Free" gift is claimed rather than
+// filtering by reward name.
 // Uses class name wildcards because the site uses hashed CSS module names (e.g. itemCard__BneJ9).
 // Returns null when no claimable gifts remain.
 async function findNextClaimButton(page) {
-  const handle = await page.evaluateHandle(
-    titles => [...document.querySelectorAll('button')].find(btn => {
-      if (btn.textContent.trim() !== 'Free') return false;
-      const card = btn.closest('[class*="itemCard__"]');
-      const titleEl = card && card.querySelector('[class*="itemCard__title"]');
-      return titleEl && titles.includes(titleEl.textContent.trim());
-    }),
-    CLAIMABLE_TITLES
+  const handle = await page.evaluateHandle(() =>
+    [...document.querySelectorAll('button')].find(btn =>
+      btn.textContent.trim() === 'Free' && btn.closest('[class*="itemCard__"]')
+    )
   );
   return handle.asElement();
 }
@@ -118,7 +113,7 @@ async function claimGifts(page, email) {
     }
   }
 
-  if (claimed === 0) log(`[${email}] No claimable Thorium gifts found`);
+  if (claimed === 0) log(`[${email}] No claimable gifts found`);
   return claimed;
 }
 
